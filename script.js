@@ -178,28 +178,47 @@ async function renderMemberDropdownList() {
     if(listDesktop) listDesktop.innerHTML = loadingHtml;
     if(listMobile) listMobile.innerHTML = loadingHtml;
 
-    const isAdmin = currentProfile && currentProfile.full_name.toLowerCase() === 'admin utama';
+    // 1. Cek status user
+    const isSuperAdmin = currentProfile && currentProfile.full_name.toLowerCase() === 'admin utama';
+    const myGroup = currentProfile ? currentProfile.admin_group : null;
 
     let dataToRender = [];
 
-    if (isAdmin) {
+    // JIKA SUPER ADMIN: Ambil semua profil
+    if (isSuperAdmin) {
         const { data, error } = await supabaseClient.from('profiles').select('id, full_name');
         if (error || !data) return;
-        
         dataToRender = data;
+    } 
+    // JIKA ADMIN GRUP (Punya admin_group): Ambil anggota di grupnya + dirinya sendiri
+    else if (myGroup) { 
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('id, full_name')
+            .eq('admin_group', myGroup); // Filter berdasarkan grup
         
-        dataToRender.sort((a, b) => {
-            if (a.id === currentUser.id) return -1;
-            if (b.id === currentUser.id) return 1;
-            return a.full_name.localeCompare(b.full_name);
-        });
-    } else {
-        dataToRender = [{
-            id: currentUser.id,
-            full_name: currentProfile.full_name
-        }];
+        if (error || !data) return;
+        
+        // Pastikan dirinya sendiri ada di list (jika belum masuk grup)
+        const isSelfIncluded = data.some(d => d.id === currentUser.id);
+        if (!isSelfIncluded) {
+            data.push({ id: currentUser.id, full_name: currentProfile.full_name });
+        }
+        dataToRender = data;
+    } 
+    // JIKA ANGGOTA BIASA: Hanya dirinya sendiri
+    else {
+        dataToRender = [{ id: currentUser.id, full_name: currentProfile.full_name }];
     }
 
+    // Urutkan: Diri sendiri paling atas
+    dataToRender.sort((a, b) => {
+        if (a.id === currentUser.id) return -1;
+        if (b.id === currentUser.id) return 1;
+        return a.full_name.localeCompare(b.full_name);
+    });
+
+    // Render ke HTML
     const generateHtml = (m) => {
         const isSelected = targetUserId === m.id;
         return `
