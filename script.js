@@ -11,6 +11,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // ==========================================
 const DEFAULT_AMALAN = [
     "Qiyamullail", "Shalat Witir", "Tilawah Al-Qur'an 1 Juz", "Baca Terjemah Al-Qur'an", 
+    "Dzikir Pagi", "Dzikir Petang",
     "Mendo'akan Palestina", "Mendo'akan Qiyadah & Jamaah PKS", "Istighfar 100x", 
     "Shalawat 100x", "Infaq", "Shalat Dhuha", "Shalat 5 Waktu Berjamaah", "Olahraga 30 Menit"
 ];
@@ -143,8 +144,20 @@ function updateUIBasedOnTarget() {
 // Cek apakah user punya hak akses edit
 function canEdit() {
     if (!currentUser || !currentProfile) return false;
+    
+    // 1. Super Admin (Admin Utama) bisa edit siapa saja
     if (currentProfile.full_name.toLowerCase() === 'admin utama') return true;
-    return targetUserId === currentUser.id;
+    
+    // 2. Jika target adalah diri sendiri, pasti bisa edit
+    if (targetUserId === currentUser.id) return true;
+
+    // 3. Jika Admin Grup, ijinkan edit (karena list dropdown sudah difilter)
+    if (currentProfile.admin_group) {
+        return true; 
+    }
+
+    // 4. Anggota biasa tidak bisa edit orang lain
+    return false;
 }
 
 // ==========================================
