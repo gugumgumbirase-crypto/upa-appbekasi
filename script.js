@@ -10,10 +10,10 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // 2. STATE & VARIABEL GLOBAL
 // ==========================================
 const DEFAULT_AMALAN = [
-    "Qiyamullail", "Shalat Witir", "Tilawah Al-Qur'an 1 Juz", "Baca Terjemah Al-Qur'an", 
+    "Qiyamullail", "Puasa Sunnah", "Tilawah Al-Qur'an 1 Juz", "Baca Terjemah Al-Qur'an", 
     "Dzikir Pagi", "Dzikir Petang",
-    "Mendo'akan Palestina", "Mendo'akan Qiyadah & Jamaah PKS", "Istighfar 100x", 
-    "Shalawat 100x", "Infaq", "Shalat Dhuha", "Shalat 5 Waktu Berjamaah", "Olahraga 30 Menit"
+    "Mendo'akan Palestina", "Mendo'akan Jamaah PKS & Qiyadah", "Istighfar 100x", 
+    "Shalawat 100x", "Infaq/Shadaqah", "Shalat Dhuha", "Shalat 5 Waktu Berjamaah", "Olahraga 30 Menit"
 ];
 
 const ICONS = {
