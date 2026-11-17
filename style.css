@@ -42,6 +42,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 /* ===============================
    SPLASH SCREEN (LOADING PWA)
    =============================== */
+/* ===============================
+   SPLASH SCREEN (LOADING PWA)
+   =============================== */
 .splash-screen {
     position: fixed;
     inset: 0;
@@ -50,32 +53,32 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #f8fafc; /* Warna slate-50 */
-    transition: opacity 0.5s ease-out;
+    background-color: #ffffff; /* PUTIH BERSIH (Samakan dgn manifest) */
+    transition: opacity 0.4s ease-out;
 }
 
 .dark .splash-screen {
-    background-color: #020617; /* Warna slate-950 */
+    background-color: #020617; /* slate-950 */
 }
 
 .splash-logo {
     width: 80px;
     height: 80px;
-    background-color: #059669; /* brand-600 */
+    background-color: #059669;
     border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 20px 25px -5px rgba(5, 150, 105, 0.4), 0 8px 10px -6px rgba(5, 150, 105, 0.4);
-    animation: splashPop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* Animasi pop-up halus */
+    animation: splashPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes splashPop {
-    0% { transform: scale(0.5); opacity: 0; }
+    0% { transform: scale(0.9); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Animasi Loading Spinner */
 .splash-loader {
     width: 24px;
     height: 24px;
@@ -94,7 +97,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     to { transform: rotate(360deg); }
 }
 
-/* Animasi Fade Out */
 .splash-screen.fade-out {
     opacity: 0;
     pointer-events: none;
