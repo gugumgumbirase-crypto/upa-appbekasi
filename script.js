@@ -259,6 +259,16 @@ function updateUIBasedOnTarget() {
     document.getElementById('currentMemberBtnTextMobile').textContent = nameDisplay;
 }
 
+// Cek apakah akun adalah Admin Grup (Admin 1, Admin 2, dst)
+function isGroupAdmin() {
+    if (!currentProfile) return false;
+    const name = (currentProfile.full_name || '').toLowerCase().trim();
+    const email = (currentUser?.email || '').toLowerCase().trim();
+    const isAdminAccount = currentProfile.role === 'admin' || name.startsWith('admin') || email.startsWith('admin');
+    
+    return Boolean(currentProfile.admin_group) && isAdminAccount;
+}
+
 // Cek apakah user punya hak akses edit
 function canEdit() {
     if (!currentUser || !currentProfile) return false;
@@ -269,8 +279,8 @@ function canEdit() {
     // 2. Jika target adalah diri sendiri, pasti bisa edit
     if (targetUserId === currentUser.id) return true;
 
-    // 3. Jika Admin Grup, ijinkan edit (karena list dropdown sudah difilter)
-    if (currentProfile.admin_group) {
+    // 3. Hanya Admin Grup (bukan anggota biasa) yang bisa edit anggota di grupnya
+    if (isGroupAdmin()) {
         return true; 
     }
 
@@ -321,8 +331,15 @@ async function renderMemberDropdownList() {
         if (error || !data) return;
         dataToRender = data;
     } 
-    // JIKA ADMIN GRUP (Punya admin_group): Ambil anggota di grupnya + dirinya sendiri
-    else if (myGroup) { 
+
+    // JIKA SUPER ADMIN: Ambil semua profil
+    if (isSuperAdmin) {
+        const { data, error } = await supabaseClient.from('profiles').select('id, full_name');
+        if (error || !data) return;
+        dataToRender = data;
+    } 
+    // JIKA ADMIN GRUP (Admin 1 / Admin 2): Ambil anggota di grupnya + dirinya sendiri
+    else if (isGroupAdmin()) { 
         const { data, error } = await supabaseClient
             .from('profiles')
             .select('id, full_name')
@@ -330,7 +347,7 @@ async function renderMemberDropdownList() {
         
         if (error || !data) return;
         
-        // Pastikan dirinya sendiri ada di list (jika belum masuk grup)
+        // Pastikan dirinya sendiri ada di list
         const isSelfIncluded = data.some(d => d.id === currentUser.id);
         if (!isSelfIncluded) {
             data.push({ id: currentUser.id, full_name: currentProfile.full_name });
