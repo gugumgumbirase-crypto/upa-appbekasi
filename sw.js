@@ -1,4 +1,4 @@
-const CACHE_NAME = 'upa-app-bekasi-v1';
+const CACHE_NAME = 'upa-app-bekasi-v2';
 const urlsToCache = [
   '/',
   '/index.html',

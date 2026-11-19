@@ -132,11 +132,11 @@
                     <span class="hidden dark:inline">Mode Terang</span>
                 </button>
 
-                <button onclick="exportDataJSON()" class="admin-json-only hidden nav-item text-xs py-2">
+                <button onclick="exportDataJSON()" style="display: none;" class="admin-json-only nav-item text-xs py-2"></button>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Backup JSON
                 </button>
 
-                <label class="admin-json-only hidden nav-item text-xs py-2 cursor-pointer">
+                <label style="display: none;" class="admin-json-only nav-item text-xs py-2 cursor-pointer"></label>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> Upload JSON
                     <input type="file" id="importFile" accept=".json" class="hidden" onchange="importDataJSON(event)">
                 </label>
@@ -200,10 +200,10 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
                             Ganti Password
                         </button>
-                        <button onclick="exportDataJSON(); toggleSettingsMenu();" class="admin-json-only hidden w-full text-left px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700">
+                        <button onclick="exportDataJSON(); toggleSettingsMenu();" style="display: none;" class="admin-json-only w-full text-left px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 items-center gap-2 border-b border-slate-100 dark:border-slate-700"></button>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Backup JSON
                         </button>
-                        <label class="admin-json-only hidden w-full text-left px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 cursor-pointer">
+                        <label style="display: none;" class="admin-json-only w-full text-left px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 items-center gap-2 border-b border-slate-100 dark:border-slate-700 cursor-pointer"></label>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> Upload JSON
                             <input type="file" id="importFileMobile" accept=".json" class="hidden" onchange="importDataJSON(event)">
                         </label>

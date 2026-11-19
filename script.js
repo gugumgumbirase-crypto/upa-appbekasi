@@ -55,11 +55,7 @@ function isJsonAdmin() {
 function updateJsonMenuVisibility() {
     const allowed = isJsonAdmin();
     document.querySelectorAll('.admin-json-only').forEach(el => {
-        if (allowed) {
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
-        }
+        el.style.display = allowed ? 'flex' : 'none';
     });
 }
 
