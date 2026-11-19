@@ -1,8 +1,8 @@
 // ==========================================
 // 1. KONFIGURASI SUPABASE
 // ==========================================
-const SUPABASE_URL = 'https://nvfdctzpdibztejwrgyr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52ZmRjdHpwZGlienRlandyZ3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MzU1NDMsImV4cCI6MjExMDExMTU0M30.A91GHmt6Z4T-LVf69pHLB7_Vpsj3rnFSImOuI4xWVcU';
+const SUPABASE_URL = 'https://nvfdctzpdibztejwrgyr.supabase.co'; // <-- PASTIKAN INI URL SUPABASE BARU ANDA
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52ZmRjdHpwZGlienRlandyZ3lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MzU1NDMsImV4cCI6MjExMDExMTU0M30.A91GHmt6Z4T-LVf69pHLB7_Vpsj3rnFSImOuI4xWVcU'; // <-- PASTIKAN INI ANON KEY SUPABASE BARU ANDA
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -48,15 +48,33 @@ let chartDonutInstance = null;
 // ==========================================
 // 3. AUTHENTICATION & LOCAL STORAGE
 // ==========================================
+function isJsonAdmin() {
+    return currentUser && currentUser.email && currentUser.email.toLowerCase() === 'adminutama@gmail.com';
+}
+
+function updateJsonMenuVisibility() {
+    const allowed = isJsonAdmin();
+    document.querySelectorAll('.admin-json-only').forEach(el => {
+        if (allowed) {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    });
+}
+
 async function checkAuth() {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     
     if (error || !session) {
+        currentUser = null;
+        updateJsonMenuVisibility();
         document.getElementById('authScreen').classList.remove('hidden');
         return;
     }
 
     currentUser = session.user;
+    updateJsonMenuVisibility();
     
     targetUserId = currentUser.id; 
     targetUserName = currentUser.email.split('@')[0];
@@ -111,11 +129,17 @@ async function handleLogout() {
     currentProfile = null;
     targetUserId = null;
     targetUserName = null;
+    updateJsonMenuVisibility();
     document.getElementById('authScreen').classList.remove('hidden');
 }
 
-// Fitur Backup Data ke JSON (Mengambil dari Supabase)
+// Fitur Backup Data ke JSON (Khusus adminutama@gmail.com)
 async function exportDataJSON() {
+    if (!isJsonAdmin()) {
+        showToast('Akses ditolak: Hanya Admin Utama yang dapat membackup JSON.', 'error');
+        return;
+    }
+
     try {
         showToast('Menyiapkan data backup...', 'info');
         
@@ -129,7 +153,7 @@ async function exportDataJSON() {
 
         const backupData = {
             exported_at: new Date().toISOString(),
-            app_name: "UPA AppBekasi",
+            app_name: "UPA Apps",
             user_profile: currentProfile,
             all_mutabaah_data: data
         };
@@ -139,9 +163,8 @@ async function exportDataJSON() {
         const a = document.createElement('a');
         a.href = url;
         
-        // Pastikan baris ini rapi
-        const safeName = currentProfile.full_name.replace(/\s+/g, '_');
-        a.download = `upa-bekasi-backup-${safeName}-${formatDateKey(new Date())}.json`;
+        const safeName = (targetUserName || currentProfile.full_name).replace(/\s+/g, '_');
+        a.download = `upa-backup-${safeName}-${formatDateKey(new Date())}.json`;
         
         a.click();
         URL.revokeObjectURL(url);
@@ -153,8 +176,14 @@ async function exportDataJSON() {
     }
 }
 
-// Fitur Upload/Restore Data dari JSON (Menyimpan ke Supabase)
+// Fitur Upload/Restore Data dari JSON (Khusus adminutama@gmail.com)
 function importDataJSON(event) {
+    if (!isJsonAdmin()) {
+        showToast('Akses ditolak: Hanya Admin Utama yang dapat mengupload JSON.', 'error');
+        event.target.value = '';
+        return;
+    }
+
     const file = event.target.files[0];
     if (!file) return;
 
@@ -168,7 +197,8 @@ function importDataJSON(event) {
                 return;
             }
 
-            if (confirm(`PERINGATAN: Ini akan menimpa seluruh data mutabaah milik ${currentProfile.full_name}. Lanjutkan?`)) {
+            const targetLabel = targetUserName || currentProfile.full_name;
+            if (confirm(`PERINGATAN: Ini akan menimpa seluruh data mutabaah milik ${targetLabel}. Lanjutkan?`)) {
                 showToast('Sedang me-restore data...', 'info');
                 
                 // Siapkan data untuk di-insert/upsert ke Supabase
@@ -238,7 +268,7 @@ function canEdit() {
     if (!currentUser || !currentProfile) return false;
     
     // 1. Super Admin (Admin Utama) bisa edit siapa saja
-    if (currentProfile.full_name.toLowerCase() === 'admin utama') return true;
+    if (currentProfile.full_name.toLowerCase() === 'admin utama' || isJsonAdmin()) return true;
     
     // 2. Jika target adalah diri sendiri, pasti bisa edit
     if (targetUserId === currentUser.id) return true;
@@ -284,7 +314,7 @@ async function renderMemberDropdownList() {
     if(listMobile) listMobile.innerHTML = loadingHtml;
 
     // 1. Cek status user
-    const isSuperAdmin = currentProfile && currentProfile.full_name.toLowerCase() === 'admin utama';
+    const isSuperAdmin = (currentProfile && currentProfile.full_name.toLowerCase() === 'admin utama') || isJsonAdmin();
     const myGroup = currentProfile ? currentProfile.admin_group : null;
 
     let dataToRender = [];
