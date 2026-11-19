@@ -129,7 +129,7 @@ async function exportDataJSON() {
 
         const backupData = {
             exported_at: new Date().toISOString(),
-            app_name: "UPA Apps",
+            app_name: "UPA AppBekasi",
             user_profile: currentProfile,
             all_mutabaah_data: data
         };
@@ -141,7 +141,7 @@ async function exportDataJSON() {
         
         // Pastikan baris ini rapi
         const safeName = currentProfile.full_name.replace(/\s+/g, '_');
-        a.download = `upa-backup-${safeName}-${formatDateKey(new Date())}.json`;
+        a.download = `upa-bekasi-backup-${safeName}-${formatDateKey(new Date())}.json`;
         
         a.click();
         URL.revokeObjectURL(url);
