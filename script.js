@@ -114,6 +114,98 @@ async function handleLogout() {
     document.getElementById('authScreen').classList.remove('hidden');
 }
 
+// Fitur Backup Data ke JSON (Mengambil dari Supabase)
+async function exportDataJSON() {
+    try {
+        showToast('Menyiapkan data backup...', 'info');
+        
+        // Ambil seluruh data mutabaah user ini dari Supabase
+        const { data, error } = await supabaseClient
+            .from('mutabaah')
+            .select('date, amalan_data, tilawah_status')
+            .eq('user_id', targetUserId);
+
+        if (error) throw error;
+
+        const backupData = {
+            exported_at: new Date().toISOString(),
+            app_name: "UPA Apps",
+            user_profile: currentProfile,
+            all_mutabaah_data: data
+        };
+
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // Pastikan baris ini rapi
+        const safeName = currentProfile.full_name.replace(/\s+/g, '_');
+        a.download = `upa-backup-${safeName}-${formatDateKey(new Date())}.json`;
+        
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('Data berhasil di-backup!', 'success');
+    } catch (err) {
+        console.error(err);
+        showToast('Gagal membackup data: ' + err.message, 'error');
+    }
+}
+
+// Fitur Upload/Restore Data dari JSON (Menyimpan ke Supabase)
+function importDataJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const json = JSON.parse(e.target.result);
+            
+            if (!json.app_name || json.app_name !== "UPA Apps" || !json.all_mutabaah_data) {
+                showToast('Format file backup tidak valid.', 'error');
+                return;
+            }
+
+            if (confirm(`PERINGATAN: Ini akan menimpa seluruh data mutabaah milik ${currentProfile.full_name}. Lanjutkan?`)) {
+                showToast('Sedang me-restore data...', 'info');
+                
+                // Siapkan data untuk di-insert/upsert ke Supabase
+                const recordsToUpsert = json.all_mutabaah_data.map(record => ({
+                    user_id: targetUserId, // Paksa masukkan ke user yang sedang aktif
+                    date: record.date,
+                    amalan_data: record.amalan_data,
+                    tilawah_status: record.tilawah_status
+                }));
+
+                // Lakukan upsert secara batch (bisa banyak data sekaligus)
+                const { error } = await supabaseClient
+                    .from('mutabaah')
+                    .upsert(recordsToUpsert, { onConflict: 'user_id, date' });
+
+                if (error) throw error;
+
+                // Reload data di layar
+                renderTilawah();
+                renderMutabaah();
+                if (!document.getElementById('view-rekap').classList.contains('hidden')) {
+                    renderRekap();
+                }
+                
+                showToast('Data berhasil di-restore ke database!', 'success');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Gagal me-restore file: ' + err.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    event.target.value = '';
+}
+
 async function fetchProfile() {
     if (!currentUser) return;
 
@@ -275,6 +367,12 @@ function switchMember(id, name) {
 function toggleSettingsMenu() {
     const dropdown = document.getElementById('settingsDropdownMobile');
     if (dropdown) dropdown.classList.toggle('hidden');
+}
+
+// Fungsi untuk Buka/Tutup Menu Pengaturan di Sidebar Desktop
+function toggleSettingsSidebar() {
+    const menu = document.getElementById('settingsSidebarMenu');
+    if (menu) menu.classList.toggle('hidden');
 }
 
 // ==========================================
@@ -852,6 +950,9 @@ window.handleChangePassword = handleChangePassword;
 window.toggleMemberDropdown = toggleMemberDropdown;
 window.switchMember = switchMember;
 window.toggleSettingsMenu = toggleSettingsMenu;
+window.toggleSettingsSidebar = toggleSettingsSidebar;
+window.exportDataJSON = exportDataJSON;
+window.importDataJSON = importDataJSON;
 
 // ==========================================
 // 12. INIT
